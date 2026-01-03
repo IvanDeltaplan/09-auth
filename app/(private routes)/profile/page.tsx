@@ -5,7 +5,7 @@ import css from "./ProfilePage.module.css";
 import Image from "next/image";
 
 import { useAuthStore } from "@/lib/store/authStore";
-import { getMe } from "@/lib/lib/api/clientApi";
+import { getMe } from "@/lib/api/clientApi";
 
 export default function ProfilePage() {
   const user = useAuthStore((state) => state.user);
