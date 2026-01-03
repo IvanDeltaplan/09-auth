@@ -5,6 +5,7 @@ import Header from "@/components/Header/Header";
 import Footer from "@/components/Footer/Footer";
 import TanStackProvider from "@/components/TanStackProvider/TanStackProvider";
 import { Roboto } from 'next/font/google';
+import AuthProvider from "@/components/AuthProvider/AuthProvider";
 
 // const geistSans = Geist({
 //   variable: "--font-geist-sans",
@@ -60,10 +61,12 @@ export default function RootLayout({
         <div id="modal-root"></div> {/* ✅ ПЕРЕМІСТІТЬ НА ПОЧАТОК */}
         
         <TanStackProvider>
-          <Header />
-          <main>{children}</main>
-          <Footer />
-          {modal}
+          <AuthProvider>
+            <Header />
+            <main>{children}</main>
+            <Footer />
+            {modal}
+          </AuthProvider>
         </TanStackProvider>
       </body>
     </html>
