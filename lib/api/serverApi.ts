@@ -4,7 +4,7 @@ import type { FetchNotesParams } from "./clientApi";
 import type { AxiosResponse } from "axios";
 
 async function cookieHeader() {
-  const cookieStore = await cookies(); // важно: await
+  const cookieStore = await cookies(); // как у тебя
   const cookieString = cookieStore
     .getAll()
     .map((c) => `${c.name}=${c.value}`)
@@ -30,10 +30,13 @@ export async function fetchNoteById(id: string) {
 }
 
 /* ========= AUTH (server) ========= */
-// ✅ нужно вернуть полный AxiosResponse, а не только data
-export async function checkSession(): Promise<AxiosResponse<{ success: boolean }>> {
+// ✅ теперь можно использовать и из proxy.ts (передав Cookie), и из server components (без аргументов)
+// ✅ возвращает полный AxiosResponse (headers/status/data)
+export async function checkSession(
+  cookie?: string
+): Promise<AxiosResponse<{ success: boolean }>> {
   return api.get("/auth/session", {
-    headers: await cookieHeader(),
+    headers: cookie ? { Cookie: cookie } : await cookieHeader(),
   });
 }
 

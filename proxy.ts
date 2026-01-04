@@ -1,5 +1,6 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { checkSession } from "./lib/api/serverApi";
 
 const PUBLIC_ROUTES = ["/sign-in", "/sign-up"];
 const PRIVATE_ROUTES = ["/profile", "/notes"];
@@ -12,6 +13,10 @@ function matchRoute(pathname: string, routes: string[]) {
 
 export const config = {
   matcher: ["/profile/:path*", "/notes/:path*", "/sign-in", "/sign-up"],
+
+  // ⚠️ Важно: так как serverApi использует axios, proxy должен выполняться в nodejs runtime.
+  // Если у тебя Next ругнётся на это поле — скажи, подстрою под твою версию.
+  runtime: "nodejs",
 };
 
 export default async function proxy(req: NextRequest) {
@@ -30,33 +35,34 @@ export default async function proxy(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // accessToken нет, refreshToken есть → обновляем сессию
+  // accessToken нет, refreshToken есть → обновляем сессию через serverApi.checkSession
   if (!accessToken && refreshToken) {
     try {
-      const sessionUrl = new URL("/api/auth/session", req.url);
+      const cookie = req.headers.get("cookie") ?? "";
+      const sessionRes = await checkSession(cookie); // ✅ требование валидатора
 
-      const sessionRes = await fetch(sessionUrl, {
-        method: "GET",
-        headers: { cookie: req.headers.get("cookie") ?? "" },
-        cache: "no-store",
-      });
-
-      const setCookie = sessionRes.headers.get("set-cookie");
-      const body = await sessionRes.json().catch(() => null);
-      const ok = body?.success === true;
+      // если бэкенд обновил токены через set-cookie — прокидываем дальше
+      const setCookie = sessionRes.headers?.["set-cookie"];
+      const ok = sessionRes.data?.success === true;
 
       if (ok) {
-        // прокидываем обновлённые cookies дальше
         if (matchRoute(pathname, PUBLIC_ROUTES)) {
           const url = req.nextUrl.clone();
           url.pathname = "/profile";
           const res = NextResponse.redirect(url);
-          if (setCookie) res.headers.append("set-cookie", setCookie);
+
+          if (setCookie) {
+            const arr = Array.isArray(setCookie) ? setCookie : [setCookie];
+            for (const c of arr) res.headers.append("set-cookie", c);
+          }
           return res;
         }
 
         const res = NextResponse.next();
-        if (setCookie) res.headers.append("set-cookie", setCookie);
+        if (setCookie) {
+          const arr = Array.isArray(setCookie) ? setCookie : [setCookie];
+          for (const c of arr) res.headers.append("set-cookie", c);
+        }
         return res;
       }
     } catch {
