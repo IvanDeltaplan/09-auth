@@ -1,29 +1,19 @@
 import type { Metadata } from "next";
-//import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+
 import Header from "@/components/Header/Header";
 import Footer from "@/components/Footer/Footer";
 import TanStackProvider from "@/components/TanStackProvider/TanStackProvider";
-import { Roboto } from 'next/font/google';
 import AuthProvider from "@/components/AuthProvider/AuthProvider";
 
-// const geistSans = Geist({
-//   variable: "--font-geist-sans",
-//   subsets: ["latin"],
-// });
-
-// const geistMono = Geist_Mono({
-//   variable: "--font-geist-mono",
-//   subsets: ["latin"],
-// });
+import { Roboto } from "next/font/google";
 
 const roboto = Roboto({
-  subsets: ['latin'], 
-  weight: ['400', '700'],
-  variable: '--font-roboto', 
-  display: 'swap', 
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-roboto",
+  display: "swap",
 });
-
 
 export const metadata: Metadata = {
   title: "Note Hub",
@@ -45,27 +35,24 @@ export const metadata: Metadata = {
   },
 };
 
-
-
-
 export default function RootLayout({
   children,
-  modal,          
+  modal,
 }: {
   children: React.ReactNode;
-  modal: React.ReactNode;  
+  modal: React.ReactNode;
 }) {
   return (
     <html lang="en">
       <body className={roboto.variable}>
-        <div id="modal-root"></div> {/* ✅ ПЕРЕМІСТІТЬ НА ПОЧАТОК */}
-        
         <TanStackProvider>
           <AuthProvider>
             <Header />
-            <main>{children}</main>
+            <main>
+              {children}
+              {modal}
+            </main>
             <Footer />
-            {modal}
           </AuthProvider>
         </TanStackProvider>
       </body>

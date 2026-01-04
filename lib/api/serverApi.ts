@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { api } from "./api";
 import type { FetchNotesParams } from "./clientApi";
+import type { AxiosResponse } from "axios";
 
 async function cookieHeader() {
   const cookieStore = await cookies(); // важно: await
@@ -29,11 +30,11 @@ export async function fetchNoteById(id: string) {
 }
 
 /* ========= AUTH (server) ========= */
-export async function checkSession() {
-  const { data } = await api.get("/auth/session", {
+// ✅ нужно вернуть полный AxiosResponse, а не только data
+export async function checkSession(): Promise<AxiosResponse<{ success: boolean }>> {
+  return api.get("/auth/session", {
     headers: await cookieHeader(),
   });
-  return data;
 }
 
 /* ========= USER (server) ========= */

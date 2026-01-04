@@ -1,40 +1,28 @@
-"use client";
-
-import { useEffect } from "react";
-import css from "./ProfilePage.module.css";
+import type { Metadata } from "next";
+import Link from "next/link";
 import Image from "next/image";
+import css from "./ProfilePage.module.css";
 
-import { useAuthStore } from "@/lib/store/authStore";
-import { getMe } from "@/lib/api/clientApi";
+import { getMe } from "@/lib/api/serverApi";
 
-export default function ProfilePage() {
-  const user = useAuthStore((state) => state.user);
-  const setUser = useAuthStore((state) => state.setUser);
+export const metadata: Metadata = {
+  title: "Profile | NoteHub",
+  description: "User profile page",
+};
 
-  // Если обновили страницу — Zustand пуст,
-  // подтягиваем пользователя из API
-  useEffect(() => {
-    if (!user) {
-      getMe()
-        .then((data) => setUser(data))
-        .catch(() => {
-          // позже можно сделать редирект на /sign-in
-        });
-    }
-  }, [user, setUser]);
-
-  if (!user) {
-    return <p>Loading profile...</p>;
-  }
+export default async function ProfilePage() {
+  const user = await getMe(); // ✅ serverApi + server component
 
   return (
     <main className={css.mainContent}>
       <div className={css.profileCard}>
         <div className={css.header}>
           <h1 className={css.formTitle}>Profile Page</h1>
-          <a href="/profile/edit" className={css.editProfileButton}>
+
+          {/* ✅ Link instead of <a> */}
+          <Link href="/profile/edit" className={css.editProfileButton}>
             Edit Profile
-          </a>
+          </Link>
         </div>
 
         <div className={css.avatarWrapper}>
@@ -44,8 +32,7 @@ export default function ProfilePage() {
             width={120}
             height={120}
             className={css.avatar}
-          />  
-          
+          />
         </div>
 
         <div className={css.profileInfo}>
