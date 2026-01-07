@@ -13,9 +13,6 @@ function matchRoute(pathname: string, routes: string[]) {
 
 export const config = {
   matcher: ["/profile/:path*", "/notes/:path*", "/sign-in", "/sign-up"],
-
-  // ⚠️ Важно: так как serverApi использует axios, proxy должен выполняться в nodejs runtime.
-  // Если у тебя Next ругнётся на это поле — скажи, подстрою под твою версию.
   runtime: "nodejs",
 };
 
@@ -29,7 +26,7 @@ export default async function proxy(req: NextRequest) {
   if (accessToken) {
     if (matchRoute(pathname, PUBLIC_ROUTES)) {
       const url = req.nextUrl.clone();
-      url.pathname = "/profile";
+      url.pathname = "/"; // ✅ редирект на главную
       return NextResponse.redirect(url);
     }
     return NextResponse.next();
@@ -39,16 +36,15 @@ export default async function proxy(req: NextRequest) {
   if (!accessToken && refreshToken) {
     try {
       const cookie = req.headers.get("cookie") ?? "";
-      const sessionRes = await checkSession(cookie); // ✅ требование валидатора
+      const sessionRes = await checkSession(cookie);
 
-      // если бэкенд обновил токены через set-cookie — прокидываем дальше
       const setCookie = sessionRes.headers?.["set-cookie"];
       const ok = sessionRes.data?.success === true;
 
       if (ok) {
         if (matchRoute(pathname, PUBLIC_ROUTES)) {
           const url = req.nextUrl.clone();
-          url.pathname = "/profile";
+          url.pathname = "/"; // ✅ редирект на главную
           const res = NextResponse.redirect(url);
 
           if (setCookie) {
