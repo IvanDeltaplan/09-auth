@@ -45,17 +45,19 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={roboto.variable}>
-        <TanStackProvider>
-          <AuthProvider>
-            <Header />
-            <main>
-              {children}
-              {modal}
-            </main>
-            <Footer />
-          </AuthProvider>
-        </TanStackProvider>
-      </body>
+  <div id="modal-root" />
+  <TanStackProvider>
+    <AuthProvider>
+      <Header />
+      <main>
+        {children}
+        {modal}
+      </main>
+      <Footer />
+    </AuthProvider>
+  </TanStackProvider>
+</body>
+
     </html>
   );
 }

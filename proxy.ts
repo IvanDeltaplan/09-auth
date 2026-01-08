@@ -13,8 +13,8 @@ function matchRoute(pathname: string, routes: string[]) {
 
 export const config = {
   matcher: ["/profile/:path*", "/notes/:path*", "/sign-in", "/sign-up"],
-  runtime: "nodejs",
 };
+
 
 export default async function proxy(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
